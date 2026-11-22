@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["name", "description", "client", "applyTo"],
+  "properties": {
+    "name": { "type": "string", "pattern": "\\S" },
+    "description": { "type": "string", "pattern": "\\S" },
+    "client": { "enum": ["copilot-only", "portable"] },
+    "applyTo": { "type": "string", "pattern": "\\S" }
+  }
+}
