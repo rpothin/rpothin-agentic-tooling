@@ -1,0 +1,10 @@
+name: 📣 Feedback / question
+description: Share feedback or ask a question.
+title: '[Feedback]: '
+body:
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Feedback or question
+    validations:
+      required: true
