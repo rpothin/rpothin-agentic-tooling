@@ -96,6 +96,17 @@ test('validates supported literal imports in the served package', async (t) => {
   await buildPlugin(root, 'sample', output);
 });
 
+test('follows reachable package-local JavaScript imports without looping', async (t) => {
+  const { root, output } = await fixture(t);
+  const extension = path.join(root, 'extensions/panel/extension.mjs');
+  const helper = path.join(root, 'plugins/sample/helper.mjs');
+  await writeFile(extension, "import '../../../helper.mjs';\n");
+  await writeFile(helper, "export * from '../outside.mjs';\n");
+  await assert.rejects(buildPlugin(root, 'sample', output), /helper\.mjs: import escapes package root/);
+  await writeFile(helper, "import './helper.mjs';\nexport const value = true;\n");
+  await buildPlugin(root, 'sample', output);
+});
+
 test('rejects independently authored duplicate plugin skills without root skills', async (t) => {
   const { root, manifest } = await fixture(t);
   manifest.extensions['io.github.rpothin.agentic-tooling'].skills = undefined;
