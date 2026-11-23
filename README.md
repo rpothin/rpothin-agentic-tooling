@@ -14,7 +14,9 @@ No resources yet.
 
 ## Skills
 
-No resources yet.
+| Name | Description | Client |
+| --- | --- | --- |
+| [build-canvas-plugin](skills/build-canvas-plugin/SKILL.md) | Guides repository-local authoring of a skills and canvas plugin. Use when composing a new canvas plugin in this repository. Do NOT use for deploying plugins, provider authorization, or general canvas-only extensions. | copilot-only |
 
 ## Plugins
 

@@ -4,6 +4,7 @@ import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
+import { assertNoCollision, composition } from '../.github/scripts/catalog/composition.mjs';
 
 const namespace = 'io.github.rpothin.agentic-tooling';
 const labels = new Set(['copilot-only', 'portable']);
@@ -124,6 +125,7 @@ export async function collectResources(root) {
       if (pluginRoot && !(await readdir(path.join(dir, entry.name))).includes('SKILL.md')) continue;
       assert(entry.isDirectory() && fileName.test(entry.name), `${dir}: unexpected entry ${entry.name}`);
       const file = path.join(dir, entry.name, 'SKILL.md');
+      if (!pluginRoot) await inspectPluginFiles(path.dirname(file), path.dirname(file));
       const { data, content } = await markdown(file, 'skill');
       assert(data.name === entry.name, `${file}: name must match directory`);
       result.skills.push({ name: data.name, description: data.description, client: data.metadata.client, file: relative(root, file) });
@@ -140,6 +142,12 @@ export async function collectResources(root) {
       result[dir].push({ ...data, file: relative(root, file) });
     }
   }
+  for (const name of ['skills', 'plugins']) {
+    const directory = path.join(root, name);
+    const stat = await lstat(directory);
+    assert(stat.isDirectory() && !stat.isSymbolicLink() &&
+      path.relative(await realpath(root), await realpath(directory)) === name, `${directory}: invalid source root`);
+  }
   await skills(path.join(root, 'skills'));
   for (const entry of await readdir(path.join(root, 'plugins'), { withFileTypes: true })) {
     if (entry.name === 'README.md' && entry.isFile()) continue;
@@ -153,8 +161,15 @@ export async function collectResources(root) {
     assert(typeof data.description === 'string' && data.description.trim(), `${file}: description is required`);
     const client = data.extensions?.[namespace]?.client;
     assert(labels.has(client), `${file}: missing or invalid ${namespace}.client`);
+    const sources = await composition(root, data);
+    for (const source of [...sources.skills, ...sources.extensions]) {
+      await inspectPluginFiles(source.source, source.source);
+    }
     const paths = [];
-    localPaths(data.extensions, (p) => paths.push(p));
+    const packageExtensions = structuredClone(data.extensions);
+    delete packageExtensions[namespace].skills;
+    delete packageExtensions[namespace].extensions;
+    localPaths(packageExtensions, (p) => paths.push(p));
     for (const p of paths) await assertContained(dir, path.resolve(dir, p));
     const entries = await readdir(dir, { withFileTypes: true });
     const mcpFile = entries.find((e) => e.name === 'mcp.json');
@@ -190,7 +205,13 @@ export async function collectResources(root) {
     const skillDir = entries.find((e) => e.name === 'skills');
     if (skillDir) {
       assert(skillDir.isDirectory(), `${dir}/skills must be a directory`);
+      for (const source of sources.skills) {
+        await assertNoCollision(path.join(dir, 'skills'), source.name);
+      }
       await skills(path.join(dir, 'skills'), dir);
+    }
+    for (const source of sources.extensions) {
+      await assertNoCollision(path.join(dir, 'com.github.copilot', 'extensions'), source.name);
     }
     result.plugins.push({ name: data.name, description: data.description, client, file: relative(root, file) });
   }
@@ -198,6 +219,13 @@ export async function collectResources(root) {
     for (const bundled of pluginSkills) {
       assert(standalone.name !== bundled.name && (!standalone.content || standalone.content !== bundled.content),
         `${standalone.file}: duplicates plugin skill ${bundled.file}`);
+    }
+  }
+  for (let i = 0; i < pluginSkills.length; i++) {
+    for (const other of pluginSkills.slice(i + 1)) {
+      const current = pluginSkills[i];
+      assert(current.name !== other.name && (!current.content || current.content !== other.content),
+        `${current.file}: duplicates plugin skill ${other.file}`);
     }
   }
   const marketplace = await readJson(path.join(root, '.github', 'plugin', 'marketplace.json'));

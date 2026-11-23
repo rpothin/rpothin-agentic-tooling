@@ -12,7 +12,7 @@ Node.js 22 and npm are required; validation also requires Python and codespell 2
 
 ## Boundaries
 
-- ✅ Always: keep standalone skills separate from self-contained plugin skills; update the index when resources change.
+- ✅ Always: keep canonical skill sources separate from materialized plugin copies; update the index when resources change.
 - ⚠️ Ask first: introduce new resource categories or alter public conventions.
 - 🚫 Never: copy content from the archived private commercial repository or commit credentials.
 

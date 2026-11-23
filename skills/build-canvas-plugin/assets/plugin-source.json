@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "example",
+  "version": "0.1.0",
+  "description": "Replace with a description of the plugin.",
+  "extensions": {
+    "io.github.rpothin.agentic-tooling": {
+      "client": "copilot-only",
+      "skills": ["./skills/example"],
+      "extensions": ["./extensions/example"]
+    }
+  }
+}
