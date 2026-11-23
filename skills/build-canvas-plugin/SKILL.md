@@ -14,22 +14,24 @@ See `references/scenario-brief.md` when defining those decisions.
 
 1. Load the native `create-canvas` skill and its SDK guide. Use its scaffold
    and lifecycle instructions; do not copy the skill or invent host APIs.
-2. Author the scenario skill under `skills/<name>/` and the canvas extension
+2. Apply `references/ui-ux-contract.md` when designing the canvas and use its
+   checklist to plan the applicable rendered UI checks.
+3. Author the scenario skill under `skills/<name>/` and the canvas extension
    under `extensions/<id>/`. Keep runtime dependencies and skill references
    inside their respective source directories. Do not rely on repository
    `node_modules` in the installed package.
-3. Compose a plugin under `plugins/<name>/` using the repository-owned
+4. Compose a plugin under `plugins/<name>/` using the repository-owned
    `io.github.rpothin.agentic-tooling` namespace. Its `client` label is
    required; its `skills` and `extensions` arrays refer to root source
    directories, for example `./skills/example` and `./extensions/example`.
    Adapt `assets/plugin-source.json` and add the matching marketplace entry.
-4. Run `npm run build`, then `npm run validate`. Materialize into a new
+5. Run `npm run build`, then `npm run validate`. Materialize into a new
    directory outside the checkout with
    `node .github/scripts/catalog/materialize-plugins.mjs <plugin-name> <new-staging-directory>`.
    Inspect the staged package, including its contained skills, references,
    extension files and manifest. Source composition arrays are build-only;
    the owner/client metadata remains.
-5. Validate scenario contracts and native discovery against the staged package.
+6. Validate scenario contracts and native discovery against the staged package.
    Record what was actually checked and any missing capabilities. Native
    canvas behavior, provider authorization, and remote distribution require
    their own evidence; a static package check does not prove them.

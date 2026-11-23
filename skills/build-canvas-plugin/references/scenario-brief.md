@@ -8,4 +8,6 @@ Before authoring, identify:
 - Loading, empty, error, partial and stale UI states, with accessible controls and theme tokens.
 - Whether state is ephemeral or persisted, where it belongs, and what recovery is actually promised.
 
+Apply [the UI/UX contract](ui-ux-contract.md) when designing and validating the canvas experience.
+
 Do not treat UI controls or local request admission as authorization for external writes. Add provider-specific authorization and recovery only when separately designed and verified.
